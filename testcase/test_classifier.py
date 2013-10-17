@@ -6,7 +6,8 @@ from jubatest.remote import SyncRemoteProcess
 
 import json
 
-class ClassifierAPIPerformanceTestBase():
+class OperationTest(JubaTestCase):
+
     @classmethod
     def init_benchmark_tool(cls):
         cls.bench = cls.env.get_param('JUBATUS_BENCH_CLASSIFIER')
@@ -16,14 +17,16 @@ class ClassifierAPIPerformanceTestBase():
         if not cls.dataset:
             raise JubaSkipTest('JUBATUS_BENCH_CLASSIFIER_DATASET parameter is not set.')
 
-    def run_benchmark_tool(self, query_mode, threads):
+    def run_benchmark_tool(self, query_mode, time, unit):
         args = [
             self.bench,
             '--host', self.target.node.get_host() + ':' + str(self.target.port),
             '--dataset', self.dataset,
             '--query-mode', query_mode,
-            '--thread-num', str(threads),
+            '--thread-num', '1', # fixed value
             '--dump-path', '/dev/stdout',
+            '--run-time', str(time),
+            '--time-unit', str(unit),
             '--silent',
         ]
         if self.name:
@@ -31,66 +34,12 @@ class ClassifierAPIPerformanceTestBase():
         stdout = self.client_node.run_process(args)
         return json.loads(stdout)
 
-    def test_update_performance(self):
-        result = self.run_benchmark_tool('update', 1)
-        self.attach_record({
-            'Throughput (QPS)': result['summary']['throughput_QPS'],
-            'Latency Mean (trimmed by 5%) (msec)': result['summary']['trimmed_latency_mean_msec'],
-            'Latency Variance (trimmed by 5%)': result['summary']['trimmed_latency_variance'],
-        })
+    def test(self):
+        self.run_benchmark_tool('update', 1, 0)
+        sleep(20)
+        result = self.run_benchmark_tool('analyze', 20, 5)
+        print result
 
-    def test_analyze_performance(self):
-        self.run_benchmark_tool('update', 1)
-        result = self.run_benchmark_tool('analyze', 1)
-        self.attach_record({
-            'Throughput (QPS)': result['summary']['throughput_QPS'],
-            'Latency Mean (trimmed by 5%) (msec)': result['summary']['trimmed_latency_mean_msec'],
-            'Latency Variance (trimmed by 5%)': result['summary']['trimmed_latency_variance'],
-        })
-
-class ClassifierAPIPerformanceStandaloneTest(JubaTestCase, ClassifierAPIPerformanceTestBase):
-    @classmethod
-    def setUpCluster(cls, env):
-        cls.env = env
-        cls.server1 = env.server_standalone(env.get_node(0), CLASSIFIER, default_config(CLASSIFIER))
-        cls.target = cls.server1
-        cls.name = ''
-        cls.client_node = env.get_node(0)
-        cls.init_benchmark_tool()
-
-    def setUp(self):
-        self.server1.start()
-
-    def tearDown(self):
-        self.server1.stop()
-
-class ClassifierAPIPerformanceDistributedTest(JubaTestCase, ClassifierAPIPerformanceTestBase):
-    @classmethod
-    def setUpCluster(cls, env):
-        cls.env = env
-        cls.node0 = env.get_node(0)
-        cls.cluster = env.cluster(CLASSIFIER, default_config(CLASSIFIER))
-        cls.server1 = env.server(cls.node0, cls.cluster)
-        cls.server2 = env.server(cls.node0, cls.cluster)
-        cls.server3 = env.server(cls.node0, cls.cluster)
-
-class ClassifierAPIPerformanceStandaloneTest(JubaTestCase, ClassifierAPIPerformanceTestBase):
-    @classmethod
-    def setUpCluster(cls, env):
-        cls.env = env
-        cls.server1 = env.server_standalone(env.get_node(0), CLASSIFIER, default_config(CLASSIFIER))
-        cls.target = cls.server1
-        cls.name = ''
-        cls.client_node = env.get_node(0)
-        cls.init_benchmark_tool()
-
-    def setUp(self):
-        self.server1.start()
-
-    def tearDown(self):
-        self.server1.stop()
-
-class ClassifierAPIPerformanceDistributedTest(JubaTestCase, ClassifierAPIPerformanceTestBase):
     @classmethod
     def setUpCluster(cls, env):
         cls.env = env
