@@ -165,6 +165,7 @@ class OperationTest(JubaTestCase):
         plt.subplot(111).xaxis.set_major_formatter(dts.DateFormatter('%H:%M:%S'))
         plt.grid(True)
         plt.tight_layout()
+        plt.legend(shadow=True, loc='best', prop = fm.FontProperties(size=8))
         plt.savefig(title + '.png')
         plt.clf()
 
