@@ -18,7 +18,7 @@ See Also https://github.com/rimms/jubatest/tree/for_operation_test/operation-tes
 
 1. Startup Keepers from entries of myenv.py
 2. Run benchmark-tool
-3. Drow graph
+3. Draw graph
 4. Shutdown Keepers 
 
 ## How to change Scenario
@@ -45,5 +45,5 @@ def test(self):
 update following method:
 
 ```python
-def drow_graph(self, timelines, title, values):
+def draw_graph(self, timelines, title, values):
 ```

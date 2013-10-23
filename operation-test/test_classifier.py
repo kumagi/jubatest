@@ -98,7 +98,7 @@ class OperationTest(JubaTestCase):
         for server in [self.keeper1, self.keeper2]:
             server.stop()
 
-    def drow_graphs(self, results):
+    def draw_graphs(self, results):
         timelines = {}
         means = {}
         variances = {}
@@ -136,15 +136,15 @@ class OperationTest(JubaTestCase):
             wrong_nums[host] = wrong_num
             error_nums[host] = error_num
             exception_nums[host] = exception_num
-        self.drow_graph(timelines, 'latency-mean (sec)', means)
-        self.drow_graph(timelines, 'latency-variances', variances)
-        self.drow_graph(timelines, 'queries', nums)
-        self.drow_graph(timelines, 'success queries', success_nums)
-        self.drow_graph(timelines, 'wrong queries', wrong_nums)
-        self.drow_graph(timelines, 'error queries', error_nums)
-        self.drow_graph(timelines, 'exception queries', exception_nums)
+        self.draw_graph(timelines, 'latency-mean (sec)', means)
+        self.draw_graph(timelines, 'latency-variances', variances)
+        self.draw_graph(timelines, 'queries', nums)
+        self.draw_graph(timelines, 'success queries', success_nums)
+        self.draw_graph(timelines, 'wrong queries', wrong_nums)
+        self.draw_graph(timelines, 'error queries', error_nums)
+        self.draw_graph(timelines, 'exception queries', exception_nums)
 
-    def drow_graph(self, timelines, title, values):
+    def draw_graph(self, timelines, title, values):
         d_min = datetime.max
         d_max = datetime.min
         v_min = 0
@@ -192,4 +192,4 @@ class OperationTest(JubaTestCase):
         targets.append((self.client_node2, self.keeper2, 'update', 60, 1, timeout))
 
         pool = ThreadPool(processes=len(targets))
-        self.drow_graphs(pool.map(self.run_benchmark_tool, targets))
+        self.draw_graphs(pool.map(self.run_benchmark_tool, targets))
