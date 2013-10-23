@@ -23,11 +23,11 @@ env.variable('LD_LIBRARY_PATH', homedir + '/local/lib')
 #  * Able to define pool of port by list
 #  * Added to list if you define
 #  * Used to run Jubatus Server and Keeper
-env.node('127.0.0.1', range(19001, 19100))
-env.node('127.0.0.1', [19101, 19102, 19103])
-env.node('127.0.0.1', 19201)
-env.node('127.0.0.1', 19301)
-env.node('127.0.0.1', 19401)
+env.node('127.0.0.1', 19001)
+env.node('127.0.0.1', 19002)
+#env.node('127.0.0.1', range(19101, 19200))
+#env.node('127.0.0.1', range(19201, 19300))
+#env.node('127.0.0.1', range(19301, 19400))
 
 # ZooKeeper
 #  * Define host and port
@@ -44,4 +44,4 @@ bench_home = homedir + '/work/github/rimms/jubatus-benchmark'
 env.param('CLUSTER_NAME', 'mytest')
 env.param('JUBATUS_BENCH_CLASSIFIER', bench_home + '/build/classifier/jubatus-bench-classifier')
 env.param('JUBATUS_BENCH_CLASSIFIER_DATASET', bench_home + '/url_svmlight/Day0.svm')
-env.param('JUBATUS_CONFIG_PATH', homedir + '/local/share/jubatus/example/config/classifier/arow.json')
+# env.param('JUBATUS_CONFIG_PATH', homedir + '/local/share/jubatus/example/config/classifier/arow.json')

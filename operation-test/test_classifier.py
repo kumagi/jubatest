@@ -7,6 +7,7 @@ from jubatest.remote import SyncRemoteProcess
 import json
 from multiprocessing.pool import ThreadPool
 from datetime import datetime
+
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -48,6 +49,7 @@ class OperationTest(JubaTestCase):
             '--query-mode', target[2],
             '--run-time', str(target[3]),
             '--time-unit', str(target[4]),
+            '--timeout', str(target[5]),
             '--dump-path', '/dev/stdout',
             '--thread-num', str(1), # fixed value
             '--silent'
@@ -59,33 +61,41 @@ class OperationTest(JubaTestCase):
     def setUpCluster(cls, env):
         cls.env = env
 
-        # Create Node Instance
-        cls.server_node1 = env.get_node(0)
-        cls.server_node2 = env.get_node(1)
-        cls.server_node3 = env.get_node(2)
-        cls.keeper_node1 = env.get_node(3)
-        cls.keeper_node2 = env.get_node(4)
+        # Create Node Instances from "env.node(host, port)" entry in myenv.py
+        cls.keeper_node1 = env.get_node(0)   # create form 1st entry in myenv.py
+        cls.keeper_node2 = env.get_node(1)   # create from 2nd entry in myenv.py
         cls.client_node1 = cls.keeper_node1
         cls.client_node2 = cls.keeper_node2
+        # Operation Test require no servers
+        # cls.server_node1 = env.get_node(2)
+        # cls.server_node2 = env.get_node(3)
+        # cls.server_node3 = env.get_node(4)
 
-        # Create Cluster
+        # Get Cluster Name
         cls.name = cls.get_cluster_name()
-        cls.cluster = env.cluster(CLASSIFIER, cls.get_jubatus_config(), cls.name)
-        cls.server1 = env.server(cls.server_node1, cls.cluster)
-        cls.server2 = env.server(cls.server_node2, cls.cluster)
-        cls.server3 = env.server(cls.server_node3, cls.cluster)
+        cls.name = cls.get_cluster_name()
+
+        # Create Keeper Instances
         cls.keeper1 = env.keeper(cls.keeper_node1, CLASSIFIER)
         cls.keeper2 = env.keeper(cls.keeper_node2, CLASSIFIER)
+
+        # Operation Test require no servers
+        # cls.cluster = env.cluster(CLASSIFIER, cls.get_jubatus_config(), cls.name)
+        # cls.server1 = env.server(cls.server_node1, cls.cluster)
+        # cls.server2 = env.server(cls.server_node2, cls.cluster)
+        # cls.server3 = env.server(cls.server_node3, cls.cluster)
 
         # Initialize benchmark tool
         cls.init_benchmark_tool()
 
     def setUp(self):
-        for server in [self.server1, self.server2, self.server3, self.keeper1, self.keeper2]:
+        # for server in [self.server1, self.server2, self.server3, self.keeper1, self.keeper2]:
+        for server in [self.keeper1, self.keeper2]:
             server.start()
 
     def tearDown(self):
-        for server in [self.server1, self.server2, self.server3, self.keeper1, self.keeper2]:
+        # for server in [self.server1, self.server2, self.server3, self.keeper1, self.keeper2]:
+        for server in [self.keeper1, self.keeper2]:
             server.stop()
 
     def drow_graphs(self, results):
@@ -175,10 +185,11 @@ class OperationTest(JubaTestCase):
     """
     def test(self):
         targets = []
+        timeout = 1
         # tupple
-        #  (client_node, keeper, query_type, run_time, time_unit)
-        targets.append((self.client_node1, self.keeper1, 'update', 60, 1))
-        targets.append((self.client_node2, self.keeper2, 'update', 60, 1))
+        #  (client_node, keeper, query_type, run_time, time_unit, client_timeout)
+        targets.append((self.client_node1, self.keeper1, 'update', 60, 1, timeout))
+        targets.append((self.client_node2, self.keeper2, 'update', 60, 1, timeout))
 
         pool = ThreadPool(processes=len(targets))
         self.drow_graphs(pool.map(self.run_benchmark_tool, targets))
